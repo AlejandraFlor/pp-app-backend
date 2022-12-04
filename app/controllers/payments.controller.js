@@ -267,6 +267,50 @@ exports.getTransactions = async (req, res) => {
       });
 }
 
+exports.getOnlyTimeTransactions = async (req, res) => {
+  Transaction.findAll({
+      where: {type: "onlyTime"},
+      limit: req.body.limit,
+      include: [{
+        model: TransactionState,
+        attributes: ['state'],
+        required: true
+      }],
+      offset: req.body.offset
+    })
+    .then(async (trans) => {
+          if (!trans) {
+          return res.status(404).send({ message: "Transactions for this user not found" });
+          }
+          res.status(200).send(trans);
+      }).catch(err => {
+          res.status(500).send({ message: err.message });
+      });
+}
+
+exports.getRecurrentTransactions = async (req, res) => {
+  Transaction.findAll({
+      where: {type: "recurrent"},
+      limit: req.body.limit,
+      include: [{
+        model: TransactionState,
+        attributes: ['state'],
+        required: true
+      }],
+      offset: req.body.offset
+    })
+    .then(async (trans) => {
+          if (!trans) {
+          return res.status(404).send({ message: "Transactions for this user not found" });
+          }
+          res.status(200).send(trans);
+      }).catch(err => {
+          res.status(500).send({ message: err.message });
+      });
+}
+
+
+
 exports.getTransaction = async (req, res) => {
   Transaction.findAll({
       where: {userId: req.body.userId},

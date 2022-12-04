@@ -138,6 +138,19 @@ exports.findUserById = async (req, res) => {
       });
 }
 
+exports.findAllUsers = async (req, res) => {
+  User.findAll({
+    })
+    .then(async (user) => {
+          if (!user) {
+            return res.status(200).send(undefined);
+          }
+          res.status(200).send(user);
+      }).catch(err => {
+          res.status(500).send({ message: err.message });
+      });
+}
+
 exports.getUserLifeImpact= async (req, res) => {
   var lifeImpact = 0
   Transaction.findAll({

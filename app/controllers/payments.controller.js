@@ -1,6 +1,6 @@
 const { subscriptionStateHistoric } = require("../models");
 const db = require("../models");
-const { user: User, subscription: Subscription, transaction: Transaction, subscriptionState: SubscriptionState, transactionState: TransactionState, subscriptionStateHistoric: SubscriptionStateHistoric ,user_milestone: User_milestone} = db;
+const { user: User, subscription: Subscription, transactionPreference: TransactionPreference, transaction: Transaction, subscriptionState: SubscriptionState, transactionState: TransactionState, subscriptionStateHistoric: SubscriptionStateHistoric ,user_milestone: User_milestone} = db;
 const Op = db.Sequelize.Op;
 const Sequelize = db.Sequelize;
 const sequelize = new Sequelize('postgres://wtukelbehxinsv:d49ff7b066783cae788b94cab4b23d673cd689b8c3c8bb12fc80de824f73b503@ec2-3-220-207-90.compute-1.amazonaws.com:5432/dai8n8nsdbani8');
@@ -178,16 +178,16 @@ exports.modifyTransactionState = async (req, res) => {
           transactionId: req.body.transactionId
         }
       })
-      .then(async (subs) => {
-            if (!subs) {
+      .then(async (trans) => {
+            if (!trans) {
             return res.status(404).send({ message: "Transaction Not found." });
             }
-            if(subs.state !== "P"){
+            if(trans.state !== "P"){
               return res.status(400).send({ message: "Invalid state modification." });
             }
             try {
             const transactionState = await TransactionState.upsert({
-                id: subs.id,
+                id: trans.id,
                 state: req.body.state,
             });
                 res.send({ message: "Transaction state modified successfully!" });
@@ -198,6 +198,31 @@ exports.modifyTransactionState = async (req, res) => {
         }).catch(err => {
             res.status(500).send({ message: err.message });
         });
+}
+
+exports.modifyTransactionStateByPreference = async (req, res) => {
+  TransactionPreference.findOne({
+      where: {
+        preferenceId: req.body.preferenceId
+      }
+    })
+    .then(async (trans) => {
+          if (!trans) {
+          return res.status(404).send({ message: "Transaction Prefererence Not found." });
+          }
+          try {
+          const transactionState = await TransactionState.upsert({
+              id: trans.transactionId,
+              state: req.body.state,
+          });
+              res.send({ message: "Transaction state modified successfully!" });
+          }
+          catch (error) {
+          res.status(500).send({ message: error.message });
+          }
+      }).catch(err => {
+          res.status(500).send({ message: err.message });
+      });
 }
 
 exports.getSubscription = async (req, res) => {

@@ -14,6 +14,7 @@ module.exports = function(app) {
   app.post("/api/payment/modifySubscription", controller.modifySubscription);
   app.post("/api/payment/modifySubscriptionState", controller.modifySubscriptionState);
   app.post("/api/payment/modifyTransactionState", controller.modifyTransactionState);
+  app.post("/api/payment/modifyTransactionStateByPreference", controller.modifyTransactionStateByPreference);
   app.post("/api/payment/getSubscription", controller.getSubscription);
   app.post("/api/payment/getTransaction", controller.getTransaction);
   app.post("/api/payment/getSubscriptions", controller.getSubscriptions);

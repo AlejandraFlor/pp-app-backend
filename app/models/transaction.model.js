@@ -8,7 +8,7 @@ module.exports = (sequelize, Sequelize) => {
       },
       type: {
         type: Sequelize.ENUM("onlyTime","recurrent")
-      }
+      },
     });
     return Transaction;
   };

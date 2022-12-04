@@ -1,5 +1,6 @@
 const config = require("../config/db.config.js");
 const Sequelize = require("sequelize");
+const { DB } = require("../config/db.config.js");
 const sequelize = new Sequelize('postgres://wtukelbehxinsv:d49ff7b066783cae788b94cab4b23d673cd689b8c3c8bb12fc80de824f73b503@ec2-3-220-207-90.compute-1.amazonaws.com:5432/dai8n8nsdbani8', {
   dialect: 'postgres',
   protocol: 'postgres',
@@ -24,6 +25,7 @@ db.changePasswordToken = require("../models/changePasswordToken.model.js")(seque
 db.subscriptionStateHistoric = require("../models/subscriptionStateHistoric.model.js")(sequelize, Sequelize);
 db.milestone = require("./milestone.model.js")(sequelize, Sequelize);
 db.activity = require("./activity.model.js")(sequelize, Sequelize);
+db.transactionPreference = require("../models/transactionPreference.model.js")(sequelize, Sequelize);
 //db.event = require("../models/event.model.js")(sequelize, Sequelize);
 
 db.role.belongsToMany(db.user, {
@@ -71,6 +73,9 @@ db.subscriptionStateHistoric.belongsTo(db.subscription,{
 db.transaction.belongsTo(db.user,{
   foreignKey: 'userId', targetKey: 'id'
 });
+db.transactionPreference.belongsTo(db.transaction, {
+  foreignKey:'transactionId', targetKey: 'id'
+})
 db.transactionState.belongsTo(db.transaction,{
   foreignKey: 'transactionId', targetKey: 'id'
 });

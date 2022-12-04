@@ -1,13 +1,9 @@
 const axios = require('axios');
 const {mercadopago} = require("../utils/mercadoPago");
-const { subscriptionStateHistoric, user } = require("../models");
 const db = require("../models");
 const { OPEN_READWRITE } = require("sqlite3");
-const { user: User, subscription: Subscription, transaction: Transaction, subscriptionState: SubscriptionState, transactionState: TransactionState, subscriptionStateHistoric: SubscriptionStateHistoric ,user_milestone: User_milestone} = db;
-const Op = db.Sequelize.Op;
+const { user: User, subscription: Subscription, transactionPreference: TransactionPreference, transaction: Transaction, subscriptionState: SubscriptionState, transactionState: TransactionState, subscriptionStateHistoric: SubscriptionStateHistoric ,user_milestone: User_milestone} = db;
 const Sequelize = db.Sequelize;
-const sequelize = new Sequelize('postgres://wtukelbehxinsv:d49ff7b066783cae788b94cab4b23d673cd689b8c3c8bb12fc80de824f73b503@ec2-3-220-207-90.compute-1.amazonaws.com:5432/dai8n8nsdbani8');
-
 exports.createAndPayTransaction = async (req, res) => {
     console.log(req.body)
     var d = new Date();
@@ -23,19 +19,6 @@ exports.createAndPayTransaction = async (req, res) => {
       res.status(400).send({ message: "Empty request" });
       return 0;
     }
-    try {
-      const transaction = await Transaction.create({
-        amount: req.body.amount,
-        type: req.body.type,
-        paymentDate: date,
-        userId: req.body.userId,
-        subscriptionId: req.body.subscriptionId,
-      });
-      if (transaction) {
-        const transactionState = await TransactionState.create({
-          state: "P",
-           transactionId: transaction.id,
-        });
         let preference = {
             items: [
                 {
@@ -46,9 +29,9 @@ exports.createAndPayTransaction = async (req, res) => {
                 }
             ],
             back_urls: {
-                "success": "http://localhost:3000/donar",
-                "failure": "http://localhost:3000/donar",
-                "pending": "http://localhost:3000/donar"
+                "success": "http://localhost:3000/resultadoDonacion",
+                "failure": "http://localhost:3000/resultadoDonacion",
+                "pending": "http://localhost:3000/resultadoDonacion"
             },
             payer: {
               name:req.body.name,
@@ -60,19 +43,36 @@ exports.createAndPayTransaction = async (req, res) => {
             
         };
     mercadopago.preferences.create(preference)
-		.then(function (response) {
-            console.log(response)
-			res.send({
-				url: response.body.init_point
-			});
-		}).catch(function (error) {
-			console.log(error);
-		});
-      };
+		.then(async function (response) {
+      console.log(response)
+      try {
+        const transaction = await Transaction.create({
+          amount: req.body.amount,
+          type: req.body.type,
+          paymentDate: date,
+          userId: req.body.userId,
+          subscriptionId: req.body.subscriptionId,
+        });
+        if (transaction) {
+          const transactionState = await TransactionState.create({
+            state: "P",
+             transactionId: transaction.id,
+          });
+          const transactionPreference = await TransactionPreference.create({
+            preferenceId: response.body.id,
+            transactionId: transaction.id,
+          });
+        res.send({
+          url: response.body.init_point
+        });
+        }
     } catch (error) {
       res.status(500).send({ message: error.message });
     }
-  };
+    }).catch(function (error) {
+      console.log(error);
+    });
+};
 
 exports.getPreference = async (req, res) => {
   console.log(req.body.id);

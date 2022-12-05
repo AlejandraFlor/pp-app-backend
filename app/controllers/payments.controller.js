@@ -273,12 +273,15 @@ exports.getSubscription = async (req, res) => {
 exports.getSubscriptions = async (req, res) => {
   Subscription.findAll({
       limit: req.body.limit,
+      offset: req.body.offset,
       include: [{
         model: SubscriptionState,
         attributes: ['state'],
         required: true
       }],
-      offset: req.body.offset
+      order: [
+        ['id', 'DESC']
+      ],
     })
     .then(async (trans) => {
           if (!trans) {
@@ -298,7 +301,10 @@ exports.getTransactions = async (req, res) => {
         attributes: ['state'],
         required: true
       }],
-      offset: req.body.offset
+      offset: req.body.offset,
+      order: [
+        ['id', 'DESC']
+      ],
     })
     .then(async (trans) => {
           if (!trans) {

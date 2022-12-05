@@ -248,11 +248,15 @@ exports.getSubscription = async (req, res) => {
 exports.getSubscriptions = async (req, res) => {
   Subscription.findAll({
       limit: req.body.limit,
+      offset: req.body.offset,
       include: [{
         model: SubscriptionState,
         attributes: ['state'],
         required: true
       }],
+      order: [
+        ['id', 'ASC'],
+      ],
       offset: req.body.offset
     })
     .then(async (trans) => {
@@ -268,11 +272,15 @@ exports.getSubscriptions = async (req, res) => {
 exports.getTransactions = async (req, res) => {
   Transaction.findAll({
       limit: req.body.limit,
+      offset: req.body.offset,
       include: [{
         model: TransactionState,
         attributes: ['state'],
         required: true
       }],
+      order: [
+        ['id', 'ASC'],
+      ],
       offset: req.body.offset
     })
     .then(async (trans) => {
@@ -289,11 +297,15 @@ exports.getOnlyTimeTransactions = async (req, res) => {
   Transaction.findAll({
       where: {type: "onlyTime"},
       limit: req.body.limit,
+      offset: req.body.offset,
       include: [{
         model: TransactionState,
         attributes: ['state'],
         required: true
       }],
+       order: [
+            ['id', 'ASC'],
+        ],
       offset: req.body.offset
     })
     .then(async (trans) => {
@@ -310,11 +322,15 @@ exports.getRecurrentTransactions = async (req, res) => {
   Transaction.findAll({
       where: {type: "recurrent"},
       limit: req.body.limit,
+      offset: req.body.offset,
       include: [{
         model: TransactionState,
         attributes: ['state'],
         required: true
       }],
+      order: [
+        ['id', 'ASC'],
+      ],
       offset: req.body.offset
     })
     .then(async (trans) => {

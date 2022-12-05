@@ -63,7 +63,8 @@ exports.createAndPayTransaction = async (req, res) => {
             transactionId: transaction.id,
           });
         res.send({
-          url: response.body.init_point
+          url: response.body.init_point,
+          preferenceId: response.body.id
         });
         }
     } catch (error) {

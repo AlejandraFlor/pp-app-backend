@@ -27,8 +27,8 @@ test('should return all notifications', async () => {
 
 test('should create a notification', async () => {
     const res = await axios.post('http://localhost:8080/api/notification/createNotification', {
-        title: "test",
-        description: "test"
+        title: "Tienen una nuevo cobro sugerido", 
+        description: "Se le sugiere emitir los cobros sugeridos por el sistema."
     }).catch(e =>{
         expect(e.response.status).toEqual(500)
       })

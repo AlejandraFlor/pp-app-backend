@@ -26,6 +26,7 @@ exports.createActivity = async (req, res) => {
         limit:5,
       })
       .then(async (userAct) => {
+        console.log("USER ACT---------------------------", userAct);
         res.status(200).send(userAct);
         }).catch(err => {
             res.status(500).send({ message: err.message });

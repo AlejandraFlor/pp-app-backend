@@ -1,6 +1,6 @@
 const { subscriptionStateHistoric } = require("../models");
 const db = require("../models");
-const { user: User, subscription: Subscription, transaction: Transaction, subscriptionState: SubscriptionState, transactionState: TransactionState, subscriptionStateHistoric: SubscriptionStateHistoric ,user_milestone: User_milestone} = db;
+const { user: User, subscription: Subscription, transaction: Transaction, subscriptionState: SubscriptionState, transactionState: TransactionState, subscriptionStateHistoric: SubscriptionStateHistoric ,user_milestone: User_milestone, subsPayment: SubsPayment} = db;
 const Op = db.Sequelize.Op;
 const Sequelize = db.Sequelize;
 const sequelize = new Sequelize('postgres://wtukelbehxinsv:d49ff7b066783cae788b94cab4b23d673cd689b8c3c8bb12fc80de824f73b503@ec2-3-220-207-90.compute-1.amazonaws.com:5432/dai8n8nsdbani8');
@@ -647,5 +647,128 @@ exports.addReferred = async (req, res) => {
 
     }).catch(err => {
         res.status(500).send({ message: err.message });
+  });
+}
+
+exports.createPaymentSubs = async (req, res) => {
+  if(Object.keys(req.body).length === 0){
+    res.status(400).send({ message: "Empty request" });
+    return 0;
+  }
+  try {
+    const subsPayment = await SubsPayment.create({
+      amount: req.body.amount,
+      configuredPaymentDate:req.body.date,
+      paymentDate: req.body.date,
+      userId: req.body.user,
+      emmited: "NE",
+    });
+    if (subsPayment) {
+      res.send({ message: "Payment  for Subscriotion created successfully!" });
+    };
+  } catch (error) {
+    res.status(500).send({ message: error.message });
+  }
+};
+
+exports.getPaymentSubs = async (req, res) => {
+  SubsPayment.findAll({
+    })
+    .then(async (psubs) => {
+          if (!psubs) {
+          return res.status(404).send({ message: "Payments not found" });
+          }
+          res.status(200).send(psubs);
+      }).catch(err => {
+          res.status(500).send({ message: err.message });
+      });
+}
+
+exports.getPaymentSubsNE = async (req, res) => {
+  SubsPayment.findAll({
+    where: {
+      emmited: "NE",
+    }
+    })
+    .then(async (psubs) => {
+          if (!psubs) {
+          return res.status(404).send({ message: "Payments not found" });
+          }
+          res.status(200).send(psubs);
+      }).catch(err => {
+          res.status(500).send({ message: err.message });
+      });
+}
+
+exports.getPaymentSubsE = async (req, res) => {
+  SubsPayment.findAll({
+    where: {
+      emmited: "E",
+    }
+    })
+    .then(async (psubs) => {
+          if (!psubs) {
+          return res.status(404).send({ message: "Payments not found" });
+          }
+          res.status(200).send(psubs);
+      }).catch(err => {
+          res.status(500).send({ message: err.message });
+      });
+}
+
+exports.deletePaymentSubs = async (req, res) => {
+  SubsPayment.destroy({
+    where: {
+      id: req.body.id
+    }
+  })
+  .then(async (statusCode) => {
+     res.status(statusCode);
+  }).catch(err => {
+    res.status(500).send({ message: err.message });
+  });
+}
+
+exports.deletePaymentSubsFromSuggested = async (req, res) => {
+  Transaction.destroy({
+    where: {
+      id: req.body.id
+    }
+  })
+  .then(async (statusCode) => {
+    res.status(statusCode);
+  }).catch(err => {
+    res.status(500).send({ message: err.message });
+  });
+}
+
+exports.emmitPaymentSubs = async (req, res) => {
+  SubsPayment.update(
+    {
+      emmited: "E",
+    },
+    {
+      where: { id: req.body.id },
+    }
+  ).then(async (statusCode) => {
+    res.status(statusCode);     
+  }).catch(err => {
+      res.status(500).send({ message: err.message });
+  });
+}
+
+exports.modifyPaymentSubs = async (req, res) => {
+  SubsPayment.update(
+    {
+      amount: req.body.amount,
+      paymentDate: req.body.paymentDate,
+    },
+    {
+      where: { id: req.body.id },
+    }
+  ).then(async (statusCode) => {
+    res.status(statusCode);     
+  }).catch(err => {
+      res.status(500).send({ message: err.message });
   });
 }

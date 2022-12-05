@@ -33,6 +33,7 @@ app.use(
 // database
 const db = require("./app/models");
 const userRoutes = require("./app/routes/user.routes");
+const { createNotification } = require("./app/controllers/notification.controller");
 const Role = db.role;
 
 db.sequelize.sync();
@@ -45,6 +46,7 @@ require("./app/routes/milestones.routes")(app);
 require("./app/routes/activities.routes")(app);
 require("./app/routes/profilepicture.routes")(app);
 require("./app/routes/globalimages.routes")(app);
+require("./app/routes/notification.routes")(app);
 
 var subs = ""
 var transactions = ""
@@ -124,6 +126,7 @@ filterSubs().then(subs => {
     var nextPaymentDate = current.toISOString().split('T')[0]
     changeNextDate(subs.data[i].id,nextPaymentDate,paymentDate).then(res => console.log(res.status))
     createTransaction(subs.data[i].amount,"recurrent",subs.data[i].userId,subs.data[i].id).then(res => console.log(res.status))
+    createNotification("Tienen una nuevo cobro sugerido", "Se le sugiere emitir los cobros sugeridos por el sistema.")
   }
 });
 

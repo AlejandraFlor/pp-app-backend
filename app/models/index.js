@@ -17,6 +17,7 @@ db.user = require("../models/user.model.js")(sequelize, Sequelize);
 db.role = require("../models/role.model.js")(sequelize, Sequelize);
 db.subscription = require("../models/subscription.model.js")(sequelize, Sequelize);
 db.subscriptionState = require("../models/subscriptionState.model.js")(sequelize, Sequelize);
+db.subsPayment = require("../models/subsPayment.model.js")(sequelize, Sequelize);
 db.transaction = require("../models/transaction.model.js")(sequelize, Sequelize);
 db.transactionState = require("../models/transactionState.model.js")(sequelize, Sequelize);
 db.refreshToken = require("../models/refreshToken.model.js")(sequelize, Sequelize);
@@ -24,6 +25,7 @@ db.changePasswordToken = require("../models/changePasswordToken.model.js")(seque
 db.subscriptionStateHistoric = require("../models/subscriptionStateHistoric.model.js")(sequelize, Sequelize);
 db.milestone = require("./milestone.model.js")(sequelize, Sequelize);
 db.activity = require("./activity.model.js")(sequelize, Sequelize);
+db.notification = require("./notification.model.js")(sequelize, Sequelize);
 //db.event = require("../models/event.model.js")(sequelize, Sequelize);
 
 db.role.belongsToMany(db.user, {
@@ -68,6 +70,9 @@ db.activity.belongsTo(db.user,{
 db.subscriptionStateHistoric.belongsTo(db.subscription,{
   foreignKey: 'subscriptionId', targetKey: 'id'
 });
+db.subsPayment.belongsTo(db.user,{
+  foreignKey: 'userId', targetKey: 'id'
+});
 db.transaction.belongsTo(db.user,{
   foreignKey: 'userId', targetKey: 'id'
 });
@@ -96,6 +101,9 @@ db.user.hasOne(db.subscription, {
   foreignKey: 'userId', targetKey: 'id'
 });
 db.user.hasOne(db.transaction, {
+  foreignKey: 'userId', targetKey: 'id'
+});
+db.user.hasOne(db.subsPayment, {
   foreignKey: 'userId', targetKey: 'id'
 });
 db.subscription.hasOne(db.subscriptionState, {

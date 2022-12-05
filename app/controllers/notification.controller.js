@@ -25,7 +25,7 @@ exports.createNotification = async (req, res) => {
       .then(async (userData) => {
         res.status(200).send(userData);
         }).catch(err => {
-            res.status(500).send({ message: err.message });
+            res.status(500).send({ message: 'Notifications not found!' });
         });
   };
 

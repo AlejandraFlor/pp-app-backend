@@ -741,7 +741,7 @@ exports.deletePaymentSubs = async (req, res) => {
     }
   })
   .then(async (statusCode) => {
-     res.status(statusCode);
+    res.status(200).send({ message: "Payment deleted!" });
   }).catch(err => {
     res.status(500).send({ message: err.message });
   });
@@ -769,7 +769,7 @@ exports.emmitPaymentSubs = async (req, res) => {
       where: { id: req.body.id },
     }
   ).then(async (statusCode) => {
-    res.status(statusCode);     
+    res.status(200).send({ message: "Payment emmited!" });   
   }).catch(err => {
       res.status(500).send({ message: err.message });
   });
@@ -785,7 +785,7 @@ exports.modifyPaymentSubs = async (req, res) => {
       where: { id: req.body.id },
     }
   ).then(async (statusCode) => {
-    res.status(statusCode);     
+    res.status(200).send({ message: "Payment modify!" });    
   }).catch(err => {
       res.status(500).send({ message: err.message });
   });

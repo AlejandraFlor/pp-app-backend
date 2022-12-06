@@ -5,6 +5,11 @@ const { OPEN_READWRITE } = require("sqlite3");
 const { user: User, subscription: Subscription, transactionPreference: TransactionPreference, transaction: Transaction, subscriptionState: SubscriptionState, transactionState: TransactionState, subscriptionStateHistoric: SubscriptionStateHistoric ,user_milestone: User_milestone} = db;
 const Sequelize = db.Sequelize;
 exports.createAndPayTransaction = async (req, res) => {
+  console.log(req.body);
+  if(Object.keys(req.body).length === 0){
+    res.status(400).send({ message: "Empty request" });
+    return 0;
+  }
     console.log(req.body)
     var d = new Date();
         month = '' + (d.getMonth() + 1),
@@ -68,14 +73,14 @@ exports.createAndPayTransaction = async (req, res) => {
         });
         }
     } catch (error) {
-      res.status(500).send({ message: error.message });
+      res.status(400).send({ message: error.message });
     }
     }).catch(function (error) {
+      res.status(400).send({ message: error.message });
       console.log(error);
     });
 };
 
 exports.getPreference = async (req, res) => {
-  console.log(req.body.id);
-  mercadopago.preferences.get(req.body.id).then(response =>  res.send(response)).catch(error =>  res.send({ message: error.message }));
-}
+  mercadopago.preferences.get(req.body.id).then(response =>  res.send(response)).catch(error =>  res.send({ status: error.status, message: error.message }))
+};

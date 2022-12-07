@@ -185,7 +185,7 @@ app.get('/verify/:token', (req, res)=>{
 			res.send("La verificación del email fallo, posiblemente el link es invalido o ha expirado");
 		}
 		else {
-			res.redirect(`https://patapila-frontend-1m1ghtyjk-paulaaletti.vercel.app/resetPassword/${1}/${token}`); 
+			res.redirect(`https://patapila-frontend-9zu2vcvvx-paulaaletti.vercel.app/resetPassword/${1}/${token}`); 
 		}
 	});
 });

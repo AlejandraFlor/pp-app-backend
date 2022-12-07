@@ -34,9 +34,9 @@ exports.createAndPayTransaction = async (req, res) => {
                 }
             ],
             back_urls: {
-                "success": "http://localhost:3000/resultadoDonacion",
-                "failure": "http://localhost:3000/resultadoDonacion",
-                "pending": "http://localhost:3000/resultadoDonacion"
+                "success": "https://patapila-frontend-1m1ghtyjk-paulaaletti.vercel.app/resultadoDonacion",
+                "failure": "https://patapila-frontend-1m1ghtyjk-paulaaletti.vercel.app/resultadoDonacion",
+                "pending": "https://patapila-frontend-1m1ghtyjk-paulaaletti.vercel.app/resultadoDonacion"
             },
             payer: {
               name:req.body.name,

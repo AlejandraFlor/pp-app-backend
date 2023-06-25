@@ -1,15 +1,21 @@
 const config = require("../config/db.config.js");
 const Sequelize = require("sequelize");
-const sequelize = new Sequelize('postgres://wtukelbehxinsv:d49ff7b066783cae788b94cab4b23d673cd689b8c3c8bb12fc80de824f73b503@ec2-3-220-207-90.compute-1.amazonaws.com:5432/dai8n8nsdbani8', {
-  dialect: 'postgres',
-  protocol: 'postgres',
-  dialectOptions: {
-    ssl: {
-        require: true,
-        rejectUnauthorized: false
+const sequelize = new Sequelize(
+  config.DB,
+  config.USER,
+  config.PASSWORD,
+  {
+    host: config.HOST,
+    dialect: config.dialect,
+    operatorsAliases: false,
+    pool: {
+      max: config.pool.max,
+      min: config.pool.min,
+      acquire: config.pool.acquire,
+      idle: config.pool.idle
     }
-}
-});
+  }
+);
 const db = {};
 db.Sequelize = Sequelize;
 db.sequelize = sequelize;

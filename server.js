@@ -104,7 +104,7 @@ function assingLongevityMilestone(userId,milestoneId) {
   );
 }
 
-filterSubs().then(subs => {
+/*filterSubs().then(subs => {
   for( i in subs.data){
     var frequency = subs.data[i].frequency
     var paymentDate = subs.data[i].nextPaymentDate
@@ -153,7 +153,7 @@ countRecurrentTransactions().then(res => {
       console.log(res.data[i].count)
     }
   }
-})
+})*/
 
 // set port, listen for requests
 let port=process.env.PORT||8080;

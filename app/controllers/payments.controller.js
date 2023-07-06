@@ -29,7 +29,7 @@ verifyFirstSubscription = async (userId) => {
 
 function verifySubscrptionData(req){
   message = ""
-  if (typeof(req.body.userId)!= "number"){
+  /*if (typeof(req.body.userId)!= "number"){
     message += "userid debe ser un entero."
   }
   if (typeof(req.body.frequency)!= "number" || !([1,2,3,4].includes(req.body.frequency))){
@@ -40,7 +40,7 @@ function verifySubscrptionData(req){
   }
   if (typeof(req.body.nextPaymentDate)!= "string"){
     message += " La fecha de pago es inválida."
-  }
+  }*/
   return message
 }
 

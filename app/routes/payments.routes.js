@@ -1,4 +1,5 @@
 const controller = require("../controllers/payments.controller");
+const mpConstroller = require("../controllers/mp.payments.controller");
 
 module.exports = function(app) {
   app.use(function(req, res, next) {
@@ -25,4 +26,8 @@ module.exports = function(app) {
   app.post("/api/payment/addReferred", controller.addReferred)
   app.post("/api/payment/countRecurrentTransactions", controller.countRecurrentTransactions)
   app.post("/api/payment/assingLongevityMilestone", controller.assingLongevityMilestone)
+  app.post("/api/payment/process_payment", mpConstroller.mpCheckout)
+  app.post("/api/payment/create_mp_subscription", mpConstroller.createSubscription)
+  app.post("/api/payment/get_mp_plan", mpConstroller.getPlan)
+  app.post("/api/payment/create_mp_subscription", mpConstroller.createSubscription)
 };

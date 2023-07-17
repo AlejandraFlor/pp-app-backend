@@ -426,7 +426,7 @@ exports.getAllHistoricSubscriptions = async (req, res) => {
 }
 
 exports.getSubscriptionsStatesByMonth = async (req, res) => {
-  db.sequelize.query('SELECT * FROM "subscriptionStateHistorics" WHERE ((EXTRACT(YEAR FROM "createdAt") = '+req.body.year+' AND EXTRACT(MONTH FROM "createdAt") <='+req.body.month+'and (state =\'A\' or state =\'P\')) or (EXTRACT(YEAR FROM "createdAt") = '+req.body.year+' AND EXTRACT(MONTH FROM "createdAt") ='+req.body.month+'))').then(async (subsS) => {
+  db.sequelize.query('SELECT * FROM "subscriptionStateHistorics" WHERE ((EXTRACT(YEAR FROM "createdAt") = '+req.body.year+' AND EXTRACT(MONTH FROM "createdAt") <='+req.body.month+') or (EXTRACT(YEAR FROM "createdAt") = '+req.body.year+' AND EXTRACT(MONTH FROM "createdAt") ='+req.body.month+'))').then(async (subsS) => {
     if (!subsS) {
     return res.status(404).send({ message: "SubsS by month not found" });
     }
@@ -445,17 +445,22 @@ exports.getMonthIncome = async (req, res) => {
       actualMonth = '' + (d.getMonth() + 1),
       day = '' + d.getDate(),
       year = d.getFullYear();
+      console.log(actualMonth)
     
   if (actualMonth.length < 2) 
       actualMonth = '0' + actualMonth;
+      console.log(actualMonth)
 
   if (day.length < 2) 
       day = '0' + day;
   
   var monthAsString = req.body.month.toString();
+  console.log(monthAsString)
   if (monthAsString.length < 2) monthAsString = '0' + req.body.month.toString();
 
-  date = [year, monthAsString].join('-');
+  date = [year, actualMonth].join('-');
+  console.log(date)
+  
   //res.status(200).send({"total": 0})
 
   if(req.body.month <((new Date()).getMonth() + 1)){
@@ -523,10 +528,8 @@ exports.getMonthIncome = async (req, res) => {
           transAmount=0
           subsIds=[]
         }else{
-          console.log(trans)
           transAmount=0
           trans.map(t => transAmount+= parseInt(t.dataValues.totalAssetAmount))
-          console.log(transAmount)
           subsIds=trans.map(t => t.dataValues.subscriptionId);
         }
         Subscription.findAll({  

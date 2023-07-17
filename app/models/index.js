@@ -30,6 +30,8 @@ db.changePasswordToken = require("../models/changePasswordToken.model.js")(seque
 db.subscriptionStateHistoric = require("../models/subscriptionStateHistoric.model.js")(sequelize, Sequelize);
 db.milestone = require("./milestone.model.js")(sequelize, Sequelize);
 db.activity = require("./activity.model.js")(sequelize, Sequelize);
+db.image = require("./image.model.js")(sequelize, Sequelize);
+db.mpSubscription = require("./mp.subscriptions.model.js")(sequelize, Sequelize);
 //db.event = require("../models/event.model.js")(sequelize, Sequelize);
 
 db.role.belongsToMany(db.user, {
@@ -53,6 +55,9 @@ db.user.belongsToMany(db.user, {
   foreignKey: "ReferredUserId"
 });
 db.subscription.belongsTo(db.user,{
+  foreignKey: 'userId', targetKey: 'id'
+});
+db.mpSubscription.belongsTo(db.user,{
   foreignKey: 'userId', targetKey: 'id'
 });
 db.subscriptionState.belongsTo(db.subscription,{
@@ -99,6 +104,9 @@ db.user.hasOne(db.changePasswordToken, {
   foreignKey: 'userId', targetKey: 'id'
 });
 db.user.hasOne(db.subscription, {
+  foreignKey: 'userId', targetKey: 'id'
+});
+db.user.hasOne(db.mpSubscription, {
   foreignKey: 'userId', targetKey: 'id'
 });
 db.user.hasOne(db.transaction, {

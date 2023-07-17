@@ -14,7 +14,7 @@ module.exports = function(app) {
       );
       next();
     });
-    app.post('/profile/picture/:id', multer.single('file'), controller.uploadProfilePicture)
-    app.get('/profile/picture/:id', controller.getProfilePicture)
+    /*app.post('/profile/picture/:id', multer.single('file'), controller.uploadProfilePicture)
+    app.get('/profile/picture/:id', controller.getProfilePicture)*/
 
   };

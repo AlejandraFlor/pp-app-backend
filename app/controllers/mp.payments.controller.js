@@ -31,7 +31,6 @@ exports.createPlan = async (req, res) => {
     }
   })
     .then(response => {
-      console.log(response.data);
       res.status(200).send({ message: response.data });
     })
     .catch(error => {
@@ -47,7 +46,6 @@ exports.getPlan = async (req, res) => {
     }
     })
     .then(response => {
-        console.log(response.data);
         res.send(response.data)
     })
     .catch(error => {
@@ -63,7 +61,6 @@ exports.mpFindSubscription = async (req, res) => {
   }})
   .then(response => {
     // Handle the response data
-    console.log(response.data);
     res.send(response.data)
   })
   .catch(error => {
@@ -88,8 +85,8 @@ exports.mpCheckout = async (req, res) => {
       auto_recurring: {
         frequency: 1,
         frequency_type: 'months',
-        start_date: '2023-08-20T13:16:40.018-04:00',
-        end_date: '2025-07-16T13:16:40.018-04:00',
+        start_date: req.body.paymentDay,
+        end_date: '2025-07-20T13:16:40.018-04:00',
         transaction_amount: req.body.amount,
         currency_id: 'ARS'
       },
@@ -105,7 +102,6 @@ exports.mpCheckout = async (req, res) => {
     }
     })
     .then(response => {
-        console.log(response.data);
         try{
           const mpSubscription = MpSubscriptions.create({  
             token: response.data.id,
@@ -119,12 +115,11 @@ exports.mpCheckout = async (req, res) => {
             }).then(async (user) => {
               axios.post('http://localhost:8080/api/payment/createSubscription', {
                 userId: user_id,
-                amount: 980,
+                amount: req.body.amount,
                 type: "mensual",
                 frequency: 1,
-                nextPaymentDay: "2023-11-07T13:07:14.260Z",
+                nextPaymentDate: req.body.paymentDay,
               }).then(response => {
-                console.log(response.data);
               }).catch(err => {
                 res.status(500).send({ message: err.message });
               });
@@ -155,7 +150,7 @@ exports.mpCheckout = async (req, res) => {
         res.status(500).send({ message: error.message });
     });*/
 }
-    /**/
+
 findMpSubscription = async(id)=> {
   axios.get(`https://api.mercadopago.com/preapproval/${id}`, {
     headers: {
@@ -182,7 +177,6 @@ exports.getAllMpSubscriptions = async (req, res) => {
   .then(async (mpSubscription) => {
     if(mpSubscription){
       mpSubscription.forEach(element => {
-        console.log(element.token)
         axios.get(`https://api.mercadopago.com/preapproval/${element.token}`, {
           headers: { 'Authorization': 'Bearer APP_USR-8339819919751489-070916-e118ee2d8ed3b39f3e31d4956244f4cc-1418606791' }
         })
@@ -223,7 +217,6 @@ exports.getAllMpSubscriptions = async (req, res) => {
   );
 }
 exports.getAllSubs = async (req, res) => {
-  console.log("getAllMpSubscriptions")
   data = {limit: req.body.limit, offset: req.body.offset}
   axios.get(`https://api.mercadopago.com/preapproval/search?limit=${req.body.limit}&offset=${req.body.offset}`, {
   headers: {
@@ -232,7 +225,6 @@ exports.getAllSubs = async (req, res) => {
   .then(response => {
     subs = []
     response.data.results.forEach(element => {
-      console.log(element.id)
       MpSubscriptions.findOne({
         where: {
           token: element.id
@@ -264,9 +256,7 @@ exports.getAllSubs = async (req, res) => {
 }
 
 exports.getMpSubscription = async (req, res) => {
-  console.log(req.body)
     const user_id = req.body.userId;
-    console.log(user_id)
     MpSubscriptions.findAll({
       where: {
         userId: user_id
@@ -274,7 +264,6 @@ exports.getMpSubscription = async (req, res) => {
     }).then(async (mpSubscription) => {
       if(mpSubscription){
         mpSubscription = mpSubscription[mpSubscription.length-1]
-        console.log(mpSubscription)
         axios.get(`https://api.mercadopago.com/preapproval/${mpSubscription.token}`, {
           headers: {
             'Authorization': 'Bearer APP_USR-8339819919751489-070916-e118ee2d8ed3b39f3e31d4956244f4cc-1418606791'
@@ -282,7 +271,6 @@ exports.getMpSubscription = async (req, res) => {
         })
         .then(response => {
           if (response.data.status !== "cancelled"){
-            console.log(response.data)
             const data_to_send={
               id: response.data.id,
               status: response.data.status,
@@ -309,7 +297,7 @@ exports.getMpSubscription = async (req, res) => {
       }
     }
     ).catch(err => {
-      res.status(500).send({ message: err.message });
+      res.status(200).send(null);
     }
     );
 }
@@ -317,7 +305,6 @@ exports.getMpSubscription = async (req, res) => {
 
 exports.modifyMpSubscription = async (req, res) => {
   const axios = require('axios');
-  console.log(req.body)
   id = req.body.subscriptionId
   if (req.body.state != null){
     data = {
@@ -338,7 +325,6 @@ exports.modifyMpSubscription = async (req, res) => {
     }
   })
     .then(response => {
-      console.log(response);
       res.status(200).send({ message: response.data });
     })
     .catch(error => {
@@ -351,7 +337,6 @@ exports.getSubscriptionsStatesByMonth = async (req, res) => {
   var subs = []
   items = 0
   date = req.body.year + "-" + req.body.month
-  console.log(date)
   MpSubscriptions.findAll({
     limit: req.body.limit,
     offset: req.body.offset
@@ -370,7 +355,6 @@ exports.getSubscriptionsStatesByMonth = async (req, res) => {
             state = "A"
           }
           else{ state = "P"}
-          console.log(response.data)
           data = {
             id: response.data.id,
             state: state,
@@ -384,7 +368,6 @@ exports.getSubscriptionsStatesByMonth = async (req, res) => {
             }
           }
           if(state == "C" & response.data.last_modified.substring(0,7) != date){
-            console.log("invalid")
             subs.push(data)
           }
           else{

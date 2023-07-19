@@ -4,6 +4,7 @@ const cookieSession = require("cookie-session");
 const jwt = require('jsonwebtoken');
 const axios = require('axios');
 const bodyParser = require('body-parser');
+const path = require('path');
 
 const app = express();
 
@@ -11,6 +12,7 @@ app.use(cors());
 
 // parse requests of content-type - application/json
 app.use(express.json());
+app.use(express.static(path.join(__dirname, 'dbimages')))
 app.use((req, res, next ) => {
   res.header('Access-Control-Allow-Origin', '*')
   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept')
@@ -45,6 +47,7 @@ require("./app/routes/milestones.routes")(app);
 require("./app/routes/activities.routes")(app);
 require("./app/routes/profilepicture.routes")(app);
 require("./app/routes/globalimages.routes")(app);
+require("./app/routes/image.routes")(app);
 
 var subs = ""
 var transactions = ""

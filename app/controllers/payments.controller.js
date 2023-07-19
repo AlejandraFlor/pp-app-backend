@@ -1,9 +1,10 @@
 const { subscriptionStateHistoric } = require("../models");
 const db = require("../models");
-const { user: User, subscription: Subscription, transaction: Transaction, subscriptionState: SubscriptionState, transactionState: TransactionState, subscriptionStateHistoric: SubscriptionStateHistoric ,user_milestone: User_milestone} = db;
+const { user: User, subscription: Subscription, transaction: Transaction, subscriptionState: SubscriptionState, transactionState: TransactionState, subscriptionStateHistoric: SubscriptionStateHistoric ,user_milestone: User_milestone, mpSubscription: MpSubscriptions} = db;
 const Op = db.Sequelize.Op;
 const Sequelize = db.Sequelize;
-const sequelize = new Sequelize('postgres://wtukelbehxinsv:d49ff7b066783cae788b94cab4b23d673cd689b8c3c8bb12fc80de824f73b503@ec2-3-220-207-90.compute-1.amazonaws.com:5432/dai8n8nsdbani8');
+const axios = require('axios');
+//const sequelize = new Sequelize('postgres://wtukelbehxinsv:d49ff7b066783cae788b94cab4b23d673cd689b8c3c8bb12fc80de824f73b503@ec2-3-220-207-90.compute-1.amazonaws.com:5432/dai8n8nsdbani8');
 
 verifyFirstSubscription = async (userId) => {
     Subscription.findOne({
@@ -179,6 +180,7 @@ exports.modifySubscriptionState = async (req, res) => {
                 id: subs.id,
                 state: req.body.state,
             });
+            console.log(subscriptionState)
                 res.send({ message: "Subscription state modified successfully!" });
             }
             catch (error) {
@@ -430,7 +432,6 @@ exports.getSubscriptionsStatesByMonth = async (req, res) => {
     if (!subsS) {
     return res.status(404).send({ message: "SubsS by month not found" });
     }
-    console.log(subsS[0]);
     res.status(200).send(subsS[0]);
   }).catch(err => {
       res.status(500).send({ message: err.message });
@@ -445,25 +446,22 @@ exports.getMonthIncome = async (req, res) => {
       actualMonth = '' + (d.getMonth() + 1),
       day = '' + d.getDate(),
       year = d.getFullYear();
-      console.log(actualMonth)
     
   if (actualMonth.length < 2) 
       actualMonth = '0' + actualMonth;
-      console.log(actualMonth)
 
   if (day.length < 2) 
       day = '0' + day;
   
   var monthAsString = req.body.month.toString();
-  console.log(monthAsString)
+
   if (monthAsString.length < 2) monthAsString = '0' + req.body.month.toString();
 
-  date = [year, actualMonth].join('-');
-  console.log(date)
+  date = [year, monthAsString].join('-');
   
-  //res.status(200).send({"total": 0})
 
   if(req.body.month <((new Date()).getMonth() + 1)){
+
     Transaction.findAll({  
       where: {
         paymentDate: {
@@ -475,9 +473,6 @@ exports.getMonthIncome = async (req, res) => {
         attributes: [],
         where:
         {state: "A"},
-          //{[Op.and] : [{state: "A"} ,
-          //sequelize.where(sequelize.fn('MONTH', SubscriptionStateHistoric.sequelize.col(`paymentDate`)), req.body.month),
-          //sequelize.where(sequelize.fn('YEAR', SubscriptionStateHistoric.sequelize.col('paymentDate')), year)]},
         required: true
       },
      ],
@@ -512,9 +507,7 @@ exports.getMonthIncome = async (req, res) => {
           model: TransactionState,
           attributes: [],
           where:
-            {state: "A"},/*
-            sequelize.where(sequelize.fn('MONTH', SubscriptionStateHistoric.sequelize.col('paymentDate')), req.body.month),
-            sequelize.where(sequelize.fn('YEAR', SubscriptionStateHistoric.sequelize.col('paymentDate')), year)]},*/
+            {state: "A"},
           required: true
         },
       ],
@@ -571,6 +564,39 @@ exports.getMonthIncome = async (req, res) => {
       });
     }
     else{
+      /*total = 0
+      items = 0
+      console.log(date)
+      console.log("mayor")
+      MpSubscriptions.findAll({})
+      .then(async (mpSubscription) => {
+        if(mpSubscription){
+          mpSubscription.forEach(element => {
+            axios.get(`https://api.mercadopago.com/preapproval/${element.token}`, {
+              headers: { 'Authorization': 'Bearer APP_USR-8339819919751489-070916-e118ee2d8ed3b39f3e31d4956244f4cc-1418606791' }
+            })
+            .then(response => {
+              //console.log(response.data.next_payment_date.substring(0,7),date)
+              if(response.data.status == "authorized" & response.data.next_payment_date.substring(0,7) == date){
+                total+=response.data.auto_recurring.transaction_amount
+              }
+              items = items + 1
+              if (items == mpSubscription.length){
+                return res.status(200).send({"total": total});
+              }
+            })
+            .catch(error => {
+              console.log(error);
+              return res.status(500).send({ message: error.message });
+            });
+          });
+        }
+        else{
+          return res.status(404).send({ message: "trans by month not found" });
+        }
+      }).catch(err => {
+          return res.status(500).send({ message: err.message });
+      });*/
       Subscription.findAll({  
         where: {
           nextPaymentDate: {

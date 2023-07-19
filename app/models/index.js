@@ -60,6 +60,9 @@ db.subscription.belongsTo(db.user,{
 db.mpSubscription.belongsTo(db.user,{
   foreignKey: 'userId', targetKey: 'id'
 });
+db.image.belongsTo(db.user,{
+  foreignKey: 'userId', targetKey: 'id'
+});
 db.subscriptionState.belongsTo(db.subscription,{
   foreignKey: 'subscriptionId', targetKey: 'id'
 });
@@ -107,6 +110,9 @@ db.user.hasOne(db.subscription, {
   foreignKey: 'userId', targetKey: 'id'
 });
 db.user.hasOne(db.mpSubscription, {
+  foreignKey: 'userId', targetKey: 'id'
+});
+db.user.hasOne(db.image, {
   foreignKey: 'userId', targetKey: 'id'
 });
 db.user.hasOne(db.transaction, {

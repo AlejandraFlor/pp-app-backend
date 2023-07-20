@@ -3,7 +3,7 @@ const db = require("../models");
 mercadopago.configurations.setAccessToken("APP_USR-8339819919751489-070916-e118ee2d8ed3b39f3e31d4956244f4cc-1418606791");
 const axios = require('axios');
 const { findUserById } = require('./auth.controller');
-const {user: User, mpSubscription: MpSubscriptions} = db;
+const {user: User, mpSubscription: MpSubscriptions, subscription: Subscription, subscriptionState: SubscriptionState} = db;
 const Sequelize = db.Sequelize;
 
 
@@ -70,8 +70,53 @@ exports.mpFindSubscription = async (req, res) => {
   });
 }
 
+const createLocalSubscription = async (token, user_id, amount, paymentDay) => {
+  console.log(token)
+  console.log(user_id)
+  const mpSubscription = await MpSubscriptions.create({  
+      token: token,
+      userId: user_id,
+    })
+    if(mpSubscription){
+      console.log(mpSubscription)
+      User.findOne({
+        where: {
+          id: user_id
+        }
+      }).then(async (user) => {
+        console.log({          userId: user_id,
+          amount: amount,
+          type: "mensual",
+          frequency: 1,
+          nextPaymentDate: paymentDay,
+          mpSubscriptionId: token})
+
+          axios.post('http://localhost:8080/api/payment/createSubscription', {
+          userId: user_id,
+          amount: amount,
+          type: "mensual",
+          frequency: 1,
+          nextPaymentDate: paymentDay,
+          mpSubscriptionId: token
+        })
+      });
+    }
+}
+
 exports.mpCheckout = async (req, res) => {
-    console.log(req.body)
+    if (req.body.data == null){
+      return res.status(400).send({ message: "Card data is required" });
+    }
+    if (req.body.data.token == null){
+      return res.status(400).send({ message: "Token is required" });
+    }
+    if (req.body.user_id == null){
+      return res.status(400).send({ message: "User id is required" });
+    }
+    if (req.body.data.payer.email == null){
+      return res.status(400).send({ message: "Email is required" });
+    }
+
     card_data = req.body.data
     token = card_data.token
     email = card_data.payer.email
@@ -106,8 +151,9 @@ exports.mpCheckout = async (req, res) => {
           const mpSubscription = MpSubscriptions.create({  
             token: response.data.id,
             userId: user_id,
-          });
+          })
           if(mpSubscription){
+            console.log(mpSubscription)
             User.findOne({
               where: {
                 id: user_id
@@ -119,6 +165,8 @@ exports.mpCheckout = async (req, res) => {
                 type: "mensual",
                 frequency: 1,
                 nextPaymentDate: req.body.paymentDay,
+                mpSubscriptionId: response.data.id
+
               }).then(response => {
               }).catch(err => {
                 res.status(500).send({ message: err.message });
@@ -130,12 +178,12 @@ exports.mpCheckout = async (req, res) => {
           }
         }catch(error){
           console.log(error)
-          res.status(500).send({ message: error.message });
+          res.status(500).send({ message: error.response.data.message });
         }
     })
     .catch(error => {
         console.error(error);
-        res.status(500).send({ message: error.message });
+        res.status(400).send({ message: error.message });
     });
     /*mercadopago.payment.save(req.body)
     .then(function(response) {
@@ -256,6 +304,9 @@ exports.getAllSubs = async (req, res) => {
 }
 
 exports.getMpSubscription = async (req, res) => {
+    if(req.body.userId == null){
+      return res.status(400).send({ message: "User id is required" });
+    }
     const user_id = req.body.userId;
     MpSubscriptions.findAll({
       where: {
@@ -305,6 +356,18 @@ exports.getMpSubscription = async (req, res) => {
 
 exports.modifyMpSubscription = async (req, res) => {
   const axios = require('axios');
+  if(req.body.subscriptionId == null){
+    return res.status(400).send({ message: "Subscription id is required" });
+  }
+  if(req.body.state == null){
+    return res.status(400).send({ message: "State is required" });
+  }
+  if(req.body.amount == null || req.body.amount < 0){
+    return res.status(400).send({ message: "Invalid Amount" });
+  }
+  if(!(req.body.state in ["authorized", "cancelled", "paused"])){
+    return res.status(400).send({ message: "Invalid state" });
+  }
   id = req.body.subscriptionId
   if (req.body.state != null){
     data = {
@@ -318,6 +381,38 @@ exports.modifyMpSubscription = async (req, res) => {
       }
     }
   }
+  await Subscription.findOne({
+    where: {
+      mpSubscriptionId: id
+    }
+  }).then(async (subs) => {
+      if (req.body.state != null){
+        if (req.body.state == "cancelled"){
+          state = 'C'
+        }
+        else if (req.body.state == "authorized"){
+          state = 'A'
+        }
+        else{
+          state = 'P'
+        }
+        await SubscriptionState.findOne({
+          where: {
+            subscriptionId: subs.id
+          }
+        }).then(async (subsState) => {
+          console.log(subsState)
+          const subscription = await SubscriptionState.upsert({
+            id: subsState.id,
+            state: state});
+        })
+      }
+      else{
+        const subscription = await Subscription.upsert({
+            id: subs.id,
+            amount: req.body.amount});
+      }
+  }).then(async (subs) => {
   axios.put(`https://api.mercadopago.com/preapproval/${id}`, data, {
     headers: {
       'Authorization': 'Bearer APP_USR-8339819919751489-070916-e118ee2d8ed3b39f3e31d4956244f4cc-1418606791',
@@ -325,12 +420,15 @@ exports.modifyMpSubscription = async (req, res) => {
     }
   })
     .then(response => {
-      res.status(200).send({ message: response.data });
+      return res.status(200).send({ message: response.data });
     })
     .catch(error => {
       console.error(error);
-      res.status(500).send({ message: error.message });
+      return res.status(500).send({ message: error.message });
     });
+  }).catch(err => {
+    return res.status(500).send({ message: err.message });
+  });
 }
 
 exports.getSubscriptionsStatesByMonth = async (req, res) => {

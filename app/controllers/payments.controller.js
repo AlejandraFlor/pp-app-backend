@@ -70,6 +70,7 @@ exports.createSubscription = async (req, res) => {
       frequency: req.body.frequency,
       lastPaymentDate: req.body.lastPaymentDate,
       nextPaymentDate: req.body.nextPaymentDate,
+      mpSubscriptionId: req.body.mpSubscriptionId,
       userId: req.body.userId,
     });
     if (subscription) {
@@ -442,6 +443,9 @@ exports.getMonthIncome = async (req, res) => {
   if(req.body.month == undefined || req.body.month > 12 || req.body.month < 1){
     return res.status(404).send({ message: "Month Not found." });
   }
+  if(typeof(req.body.month) != "number"){
+    return res.status(404).send({ message: "Month Must be an Integer" });
+  }
   var d = new Date();
       actualMonth = '' + (d.getMonth() + 1),
       day = '' + d.getDate(),
@@ -622,7 +626,12 @@ exports.getMonthIncome = async (req, res) => {
         if(trans.length == 0){
           transAmount=0
         }else{
-          transAmount=parseInt(trans[0].dataValues.totalAssetAmount)
+          transAmount = 0
+          console.log(trans)
+          for(const amount of trans){
+            transAmount+=parseInt(amount.dataValues.totalAssetAmount)
+          }
+          //transAmount=parseInt(trans[0].dataValues.totalAssetAmount)
         }
         res.status(200).send({"total": transAmount})
       }).catch(err => {

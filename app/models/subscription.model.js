@@ -12,6 +12,9 @@ module.exports = (sequelize, Sequelize) => {
       nextPaymentDate: {
         type: Sequelize.STRING
       },
+      mpSubscriptionId: {
+        type: Sequelize.STRING  
+      }
     });
     return Subscription;
   };
